@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?language javascript?>
+
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+
+<fx:root type="javafx.scene.control.Label" prefHeight="40.0" prefWidth="40.0"
+         styleClass="mainFxmlClass" xmlns:fx="http://javafx.com/fxml">
+    <stylesheets>
+        <URL value="@graft.css"/>
+    </stylesheets>
+    <fx:script source="script.js"/>
+    <graphic>
+        <ImageView fx:id="imgViewer" fitHeight="40.0" fitWidth="40.0">
+            <Image url="/resources/00.png" fx:id="imgHide"/>
+            <Image url="/resources/00.png" fx:id="imgShow"/>
+            <image>
+                <fx:reference source="imgHide"/>
+            </image>
+        </ImageView>
+    </graphic>
+</fx:root>

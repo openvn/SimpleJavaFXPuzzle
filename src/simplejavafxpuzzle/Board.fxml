@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import graft.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox id="HBox" xmlns:fx="http://javafx.com/fxml">
+  <children>
+    <VBox blendMode="DIFFERENCE" focusTraversable="false" maxWidth="150.0" minWidth="150.0" mouseTransparent="false" rotate="0.0" HBox.hgrow="ALWAYS">
+      <children>
+        <Accordion VBox.vgrow="ALWAYS">
+          <expandedPane>
+            <TitledPane fx:id="x2" animated="false" text="untitled">
+              <content>
+                <AnchorPane id="Content">
+                  <children>
+                    <ComboBox>
+                      <items>
+                        <FXCollections fx:factory="observableArrayList">
+                          <String fx:value="Item 1" />
+                          <String fx:value="Item 2" />
+                          <String fx:value="Item 3" />
+                        </FXCollections>
+                      </items>
+                    </ComboBox>
+                  </children>
+                </AnchorPane>
+              </content>
+            </TitledPane>
+          </expandedPane>
+          <panes>
+            <fx:reference source="x2" />
+            <TitledPane animated="false" text="untitled">
+              <content>
+                <AnchorPane id="Content">
+                  <children>
+                    <Button mnemonicParsing="false" text="Button" />
+                  </children>
+                </AnchorPane>
+              </content>
+            </TitledPane>
+            <TitledPane fx:id="x1" animated="false" text="untitled">
+              <content>
+                <AnchorPane id="Content">
+                  <children>
+                    <ProgressBar progress="0.0" />
+                  </children>
+                </AnchorPane>
+              </content>
+            </TitledPane>
+          </panes>
+        </Accordion>
+      </children>
+    </VBox>
+    <TableView HBox.hgrow="ALWAYS" />
+  </children>
+</HBox>

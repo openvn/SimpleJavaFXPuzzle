@@ -34,8 +34,9 @@ public class Graft extends Label {
         }
         
         this.imgShow = new Image(url);
-        this.imgViewer.setFitWidth(size);
-        this.imgViewer.setFitHeight(size);
+//        this.imgViewer.setFitWidth(size);
+//        this.imgViewer.setFitHeight(size);
+        this.imgViewer.setImage(imgShow);
         
         this.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override

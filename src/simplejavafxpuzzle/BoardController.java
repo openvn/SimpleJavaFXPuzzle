@@ -7,6 +7,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.ResourceBundle;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -60,6 +62,7 @@ public class BoardController
     private ArrayList<String> imgs = new ArrayList<>(48);
     private Difficult gameLevel = Difficult.EASY;
     private int gameSize = 4;
+    private BoardSizeHandler bsh;
 
     @Override // This method is called by the FXMLLoader when initialization is complete
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
@@ -114,6 +117,9 @@ public class BoardController
 
         this.ComboLevel.getSelectionModel().select(0);
         this.ComboSize.getSelectionModel().select(0);
+        this.bsh = new BoardSizeHandler(this.BoardContent);
+        this.BoardContent.heightProperty().addListener(this.bsh);
+        this.BoardContent.widthProperty().addListener(this.bsh);
     }
 
     public void handleDifficultSelect(ActionEvent event) {
@@ -139,9 +145,9 @@ public class BoardController
     }
 
     public void handleImportClick(ActionEvent event) {
-        this.Import.setDisable(true);
+        //this.Import.setDisable(true);
         DirectoryChooser dc = new DirectoryChooser();
-        File folder = dc.showDialog(null);
+        File folder = dc.showDialog(((Button) event.getTarget()).getScene().getWindow());
         if (folder != null) {
             FilenameFilter filter;
             filter = new FilenameFilter() {
@@ -154,7 +160,7 @@ public class BoardController
 
             File[] files = folder.listFiles(filter);
             int numFile = files.length;
-            if (numFile >= 8) {
+            if (numFile >= 10) {
                 this.imgs.removeAll(imgs);
                 for (int i = 0; i < numFile; i++) {
                     this.imgs.add(files[i].getAbsolutePath());
@@ -168,35 +174,37 @@ public class BoardController
                 dialogStage.show();
             }
         }
-        this.Import.setDisable(false);
+        //this.Import.setDisable(false);
     }
 
     public void handleStartClick(ActionEvent event) {
         this.BoardContent.getChildren().removeAll(this.BoardContent.getChildren());
-        int sizeSelected = this.ComboSize.getSelectionModel().getSelectedIndex();
-        int size = 4;
-        if((sizeSelected == 2 && this.imgs.size() >= 32)
-                || (sizeSelected == 1 && this.imgs.size() >= 18)) {
-            size = sizeSelected*2 + 4;
+        int size = this.gameSize;
+        if (this.imgs.size() < (size*size + 2)) {
+            //alert;
         }
         double width = this.BoardContent.getHeight() / size;
-        if(this.BoardContent.getWidth() < this.BoardContent.getHeight()) {
+        if (this.BoardContent.getWidth() < this.BoardContent.getHeight()) {
             width = this.BoardContent.getWidth() / size;
         }
+        this.bsh.setSize(size);
         Random rand = new Random(System.currentTimeMillis());
-        int offset = rand.nextInt(this.imgs.size() - (size*size)/2);
+        
+        this.BoardContent.setStyle("-fx-background-image: url(\"https://www.google.com/images/srpr/logo3w.png\");"
+                + "-fx-background-repeat: stretch;"
+                + "-fx-background-position: center center;"
+                + "-fx-effect: dropshadow(three-pass-box, black, 30, 0.5, 0, 0);");
+        int offset = rand.nextInt(this.imgs.size() - (size * size) / 2);
         ArrayList<String> lst = new ArrayList<>(
-                this.imgs.subList(offset, (size*size)/2 + offset));
-        lst.addAll(this.imgs.subList(offset, size*size/2 + offset));
- 
-        for(int i = 0; i < size; i++) {
-            VBox vb = new VBox();
-            for(int j = 0; j < size; j++) {
-                System.out.println(lst.size());
+                this.imgs.subList(offset, (size * size) / 2 + offset));
+        lst.addAll(lst);
+        for (int i = 0; i < size; i++) {
+            GraftBox gb = new GraftBox();
+            for (int j = 0; j < size; j++) {
                 Graft gr = new Graft(lst.remove(rand.nextInt(lst.size())), width);
-                vb.getChildren().add(gr);
+                gb.add(gr);              
             }
-            this.BoardContent.getChildren().add(vb);
+            this.BoardContent.getChildren().add(gb);
         }
     }
 }

@@ -4,15 +4,22 @@
  */
 package graft;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.*;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBoxBuilder;
+import javafx.scene.text.Text;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
-public class Graft extends Label {
+public final class Graft extends Label {
 
     @FXML
     private ImageView imgViewer;
@@ -22,7 +29,7 @@ public class Graft extends Label {
     private Image imgHide;
     private boolean isShowing = false;
 
-    public Graft(String url, double size) {
+    public Graft(String show, double size) {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("Graft.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
@@ -33,9 +40,13 @@ public class Graft extends Label {
             throw new RuntimeException(exception);
         }
         
-        this.imgShow = new Image(url);
-//        this.imgViewer.setFitWidth(size);
-//        this.imgViewer.setFitHeight(size);
+        try (FileInputStream fstream = new FileInputStream(show)) {
+            this.imgShow = new Image(fstream);
+        } catch (Exception e) {
+            this.imgShow = new Image(show);
+        }
+
+        this.setSize(size);
         this.imgViewer.setImage(imgShow);
         
         this.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -45,7 +56,7 @@ public class Graft extends Label {
                     ((Graft) t.getSource()).setShowing(true);
                 }
             }
-        });        
+        });
     }
     
     public Graft() {
@@ -80,5 +91,10 @@ public class Graft extends Label {
         } else {
             this.imgViewer.setImage(imgShow);
         }
+    }
+    
+    public void setSize(double size) {
+        this.imgViewer.setFitWidth(size);
+        this.imgViewer.setFitHeight(size);        
     }
 }

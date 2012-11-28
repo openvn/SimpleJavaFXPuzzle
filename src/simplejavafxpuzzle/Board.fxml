@@ -92,6 +92,6 @@
         </Accordion>
       </children>
     </VBox>
-    <HBox onZoom="java.lang.System.out.println('You clicked me!');" fx:id="BoardContent" minHeight="-Infinity" minWidth="-Infinity" prefHeight="410.0" prefWidth="410.0" HBox.hgrow="ALWAYS" />
+    <HBox fx:id="BoardContent" minHeight="-Infinity" minWidth="-Infinity" prefHeight="410.0" prefWidth="410.0" HBox.hgrow="ALWAYS" />
   </children>
 </HBox>

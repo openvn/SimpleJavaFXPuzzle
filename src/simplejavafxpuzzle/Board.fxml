@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?language javascript?>
 
+<?language javascript?>
 <?import graft.*?>
 <?import java.lang.*?>
 <?import java.util.*?>
@@ -17,7 +17,7 @@
       <children>
         <Accordion fx:id="Accordion" style="" VBox.vgrow="ALWAYS">
           <expandedPane>
-            <TitledPane id="x1" fx:id="Titled3" animated="false" text="Result" textFill="BLACK" textOverrun="ELLIPSIS">
+            <TitledPane id="x1" fx:id="Titled3" animated="false" styleClass="asdasdassd" text="Result" textFill="BLACK" textOverrun="ELLIPSIS">
               <content>
                 <SplitPane dividerPositions="0.4970414201183432" focusTraversable="true" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
                   <items>
@@ -53,7 +53,7 @@
               <content>
                 <AnchorPane>
                   <children>
-                    <ComboBox fx:id="ComboSize" layoutX="67.0" layoutY="19.0">
+                    <ComboBox fx:id="ComboSize" layoutX="67.0" layoutY="19.0" onAction="#handleSizeSelect">
                       <items>
                         <FXCollections fx:factory="observableArrayList">
                           <String fx:value="4x4" />
@@ -63,9 +63,9 @@
                       </items>
                     </ComboBox>
                     <Label layoutX="14.0" layoutY="22.0" text="Size" textFill="BLACK" />
-                    <Button onAction="#handleStartClick" fx:id="StartGame" layoutX="14.0" layoutY="96.0" mnemonicParsing="false" prefWidth="115.0" text="Start Game" textFill="BLACK" underline="false" />
+                    <Button fx:id="StartGame" layoutX="14.0" layoutY="96.0" mnemonicParsing="false" onAction="#handleStartClick" prefWidth="115.0" text="Start Game" textFill="BLACK" underline="false" />
                     <Label layoutX="10.0" layoutY="51.0" text="Difficult" textFill="BLACK" />
-                    <ComboBox fx:id="ComboLevel" layoutX="67.0" layoutY="51.0" prefWidth="62.0">
+                    <ComboBox fx:id="ComboLevel" layoutX="67.0" layoutY="51.0" onAction="#handleDifficultSelect" prefWidth="62.0">
                       <items>
                         <FXCollections fx:factory="observableArrayList">
                           <String fx:value="Easy" />
@@ -82,7 +82,7 @@
               <content>
                 <AnchorPane>
                   <children>
-                    <Button onAction="#handleImportClick" fx:id="Import" layoutX="8.0" layoutY="14.0" mnemonicParsing="false" text="Import Images..." />
+                    <Button fx:id="Import" layoutX="8.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleImportClick" text="Import Images..." />
                   </children>
                 </AnchorPane>
               </content>

@@ -7,9 +7,14 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.ResourceBundle;
+import javafx.animation.Animation;
+import javafx.animation.Animation.Status;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
@@ -19,17 +24,21 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TitledPane;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.scene.layout.VBoxBuilder;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
+/**
+ *
+ * @author nvcnvn
+ */
 public class BoardController
-        implements Initializable {
+    implements Initializable, EventHandler<MouseEvent> {
 
     @FXML //  fx:id="Accordion"
     private Accordion Accordion;
@@ -63,7 +72,42 @@ public class BoardController
     private Difficult gameLevel = Difficult.EASY;
     private int gameSize = 4;
     private BoardSizeHandler bsh;
+    private ArrayList<Graft> showingNow = new ArrayList<>(2);
+    private int imgLeft = 0;
+    private int timeLeft = 0;
+    private Timeline clockTimeline;
+    private int comboPoint = 0;
+    private int comboCount;
 
+    public int getGameSize() {
+        return gameSize;
+    }
+
+    public int getComboPoint() {
+        return comboPoint;
+    }
+
+    public Label getLabelSocre() {
+        return LabelSocre;
+    }
+
+    public HBox getBoardContent() {
+        return BoardContent;
+    }
+
+    public int getImgLeft() {
+        return imgLeft;
+    }
+
+    public int getTimeLeft() {
+        return timeLeft;
+    }
+
+    public Difficult getGameLevel() {
+        return gameLevel;
+    }
+    
+    
     @Override // This method is called by the FXMLLoader when initialization is complete
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
         imgs.add("/resources/00.png");
@@ -142,10 +186,10 @@ public class BoardController
         } else {
             this.gameSize = 8;
         }
+        System.out.print(this.gameSize);
     }
 
     public void handleImportClick(ActionEvent event) {
-        //this.Import.setDisable(true);
         DirectoryChooser dc = new DirectoryChooser();
         File folder = dc.showDialog(((Button) event.getTarget()).getScene().getWindow());
         if (folder != null) {
@@ -160,7 +204,7 @@ public class BoardController
 
             File[] files = folder.listFiles(filter);
             int numFile = files.length;
-            if (numFile >= 10) {
+            if (numFile >= 9) {
                 this.imgs.removeAll(imgs);
                 for (int i = 0; i < numFile; i++) {
                     this.imgs.add(files[i].getAbsolutePath());
@@ -174,37 +218,85 @@ public class BoardController
                 dialogStage.show();
             }
         }
-        //this.Import.setDisable(false);
     }
 
     public void handleStartClick(ActionEvent event) {
+        if(this.clockTimeline != null) {
+            this.clockTimeline.stop();
+        }
         this.BoardContent.getChildren().removeAll(this.BoardContent.getChildren());
         int size = this.gameSize;
-        if (this.imgs.size() < (size*size + 2)) {
-            //alert;
+        if (this.imgs.size() < (((size*size)/2) + 1)) {
+            Stage dialogStage = new Stage();
+            dialogStage.setScene(new Scene(VBoxBuilder.create().
+                    children(new Text("This directory does not have enough pictures."
+                    + "\nNote: The formats including .jpg, .png and .gif.")).build()));
+            dialogStage.show();
+            return;
         }
         double width = this.BoardContent.getHeight() / size;
         if (this.BoardContent.getWidth() < this.BoardContent.getHeight()) {
             width = this.BoardContent.getWidth() / size;
         }
         this.bsh.setSize(size);
-        Random rand = new Random(System.currentTimeMillis());
+        this.imgLeft = size*size;
         
-        this.BoardContent.setStyle("-fx-background-image: url(\"https://www.google.com/images/srpr/logo3w.png\");"
-                + "-fx-background-repeat: stretch;"
-                + "-fx-background-position: center center;"
-                + "-fx-effect: dropshadow(three-pass-box, black, 30, 0.5, 0, 0);");
-        int offset = rand.nextInt(this.imgs.size() - (size * size) / 2);
-        ArrayList<String> lst = new ArrayList<>(
-                this.imgs.subList(offset, (size * size) / 2 + offset));
+        if(this.gameLevel == Difficult.EASY) {
+            this.timeLeft = size*size*6;
+        } else if (this.gameLevel == Difficult.NORMAL) {
+            this.timeLeft = size*size*4;
+        } else {
+            this.timeLeft = size*size*2;
+        }
+        
+        Random rand = new Random(System.currentTimeMillis());
+        ArrayList<String> tmp = new ArrayList<>(this.imgs);
+        String back = tmp.remove(rand.nextInt(tmp.size()));
+
+        int offset = rand.nextInt(tmp.size() - (size * size) / 2);
+        ArrayList<String> lst = new ArrayList<>(tmp.subList(offset, (size * size) / 2 + offset));
         lst.addAll(lst);
         for (int i = 0; i < size; i++) {
             GraftBox gb = new GraftBox();
             for (int j = 0; j < size; j++) {
-                Graft gr = new Graft(lst.remove(rand.nextInt(lst.size())), width);
-                gb.add(gr);              
+                Graft gr = new Graft(lst.remove(rand.nextInt(lst.size())), back, width);
+                gr.setOnMouseClicked(this);
+                gb.add(gr);
             }
             this.BoardContent.getChildren().add(gb);
+        }
+        ClockHandler clockHandler = new ClockHandler(this.LabelMin, this.LabelSec, this.timeLeft);
+        this.clockTimeline = new Timeline(new KeyFrame(Duration.seconds(1), clockHandler));
+        this.clockTimeline.setCycleCount(this.timeLeft);
+        this.clockTimeline.play();
+        FinishHandler fh = new FinishHandler(this);
+        this.clockTimeline.statusProperty().addListener(fh);
+    }
+
+    @Override
+    public void handle(MouseEvent t) {
+        synchronized(this) {
+            Graft gr = (Graft) t.getSource();
+            if(!gr.isShowing()) {
+                if(this.showingNow.size() == 2) {
+                    while(this.showingNow.size() > 0) {
+                        Graft grOpen = this.showingNow.remove(0);
+                        grOpen.setShowing(false);
+                    }
+                }
+                this.showingNow.add(gr);
+                gr.setShowing(true);
+                if(this.showingNow.size() == 2) {
+                    if(this.showingNow.get(0).imgHash() == this.showingNow.get(1).imgHash()) {
+                        this.showingNow.removeAll(this.showingNow);
+                        this.imgLeft = this.imgLeft - 2;
+                    }
+                }
+                if(this.imgLeft == 0) {
+                    //TODO alret win.
+                    this.clockTimeline.stop();
+                }
+            }
         }
     }
 }

@@ -1,0 +1,10 @@
+/*
+ * Empty Stylesheet file.
+*/
+
+.hidding {
+    -fx-background-color: black;
+}
+.showing {
+    -fx-background-color: white;
+}

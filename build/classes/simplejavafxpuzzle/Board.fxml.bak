@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?language javascript?>
+
+<?import graft.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+
+<HBox xmlns:fx="http://javafx.com/fxml" fx:controller="simplejavafxpuzzle.BoardController">
+  <children>
+    <VBox blendMode="DIFFERENCE" focusTraversable="false" maxWidth="150.0" minWidth="150.0" mouseTransparent="false" rotate="0.0" style="" HBox.hgrow="ALWAYS">
+      <children>
+        <Accordion fx:id="Accordion" style="" VBox.vgrow="ALWAYS">
+          <expandedPane>
+            <TitledPane id="x1" fx:id="Titled3" animated="false" text="Result" textFill="BLACK" textOverrun="ELLIPSIS">
+              <content>
+                <SplitPane dividerPositions="0.4970414201183432" focusTraversable="true" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+                  <items>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                      <children>
+                        <ProgressBar fx:id="ProcessBar" layoutX="30.0" layoutY="21.0" progress="0.0" />
+                        <Label fx:id="LabelSec" layoutX="91.0" layoutY="49.0" text="00" />
+                        <Label fx:id="LabelMin" layoutX="53.0" layoutY="49.0" text="00" />
+                      </children>
+                    </AnchorPane>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                      <children>
+                        <Label layoutX="49.0" layoutY="14.0" text="Score:">
+                          <font>
+                            <Font size="17.0" />
+                          </font>
+                        </Label>
+                        <Label fx:id="LabelSocre" layoutX="43.0" layoutY="34.0" prefHeight="30.0" prefWidth="72.0" text="Score">
+                          <font>
+                            <Font name="System Bold Italic" size="20.0" />
+                          </font>
+                        </Label>
+                        <Button fx:id="Share" layoutX="43.0" layoutY="80.0" mnemonicParsing="false" text="Share" textFill="BLACK" />
+                      </children>
+                    </AnchorPane>
+                  </items>
+                </SplitPane>
+              </content>
+            </TitledPane>
+          </expandedPane>
+          <panes>
+            <TitledPane fx:id="Titled1" animated="false" text="Common" textFill="BLACK">
+              <content>
+                <AnchorPane>
+                  <children>
+                    <ComboBox onAction="#handleSizeSelect" fx:id="ComboSize" layoutX="67.0" layoutY="19.0">
+                      <items>
+                        <FXCollections fx:factory="observableArrayList">
+                          <String fx:value="4x4" />
+                          <String fx:value="6x6" />
+                          <String fx:value="8x8" />
+                        </FXCollections>
+                      </items>
+                    </ComboBox>
+                    <Label layoutX="14.0" layoutY="22.0" text="Size" textFill="BLACK" />
+                    <Button onAction="#handleStartClick" fx:id="StartGame" layoutX="14.0" layoutY="96.0" mnemonicParsing="false" prefWidth="115.0" text="Start Game" textFill="BLACK" underline="false" />
+                    <Label layoutX="10.0" layoutY="51.0" text="Difficult" textFill="BLACK" />
+                    <ComboBox onAction="#handleDifficultSelect" fx:id="ComboLevel" layoutX="67.0" layoutY="51.0" prefWidth="62.0">
+                      <items>
+                        <FXCollections fx:factory="observableArrayList">
+                          <String fx:value="Easy" />
+                          <String fx:value="Normal" />
+                          <String fx:value="Hard" />
+                        </FXCollections>
+                      </items>
+                    </ComboBox>
+                  </children>
+                </AnchorPane>
+              </content>
+            </TitledPane>
+            <TitledPane fx:id="Titled2" animated="false" text="Config" textFill="BLACK">
+              <content>
+                <AnchorPane>
+                  <children>
+                    <Button onAction="#handleImportClick" fx:id="Import" layoutX="8.0" layoutY="14.0" mnemonicParsing="false" text="Import Images..." />
+                  </children>
+                </AnchorPane>
+              </content>
+            </TitledPane>
+            <fx:reference source="Titled3" />
+          </panes>
+        </Accordion>
+      </children>
+    </VBox>
+    <HBox fx:id="BoardContent" minHeight="-Infinity" minWidth="-Infinity" prefHeight="410.0" prefWidth="410.0" HBox.hgrow="ALWAYS" />
+  </children>
+</HBox>

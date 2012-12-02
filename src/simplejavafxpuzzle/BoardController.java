@@ -3,16 +3,17 @@ package simplejavafxpuzzle;
 import graft.Graft;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.ResourceBundle;
 import javafx.animation.Animation;
-import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -22,8 +23,9 @@ import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBoxBuilder;
@@ -38,7 +40,7 @@ import javafx.util.Duration;
  * @author nvcnvn
  */
 public class BoardController
-    implements Initializable, EventHandler<MouseEvent> {
+        implements Initializable, EventHandler<MouseEvent> {
 
     @FXML //  fx:id="Accordion"
     private Accordion Accordion;
@@ -54,8 +56,8 @@ public class BoardController
     private Label LabelSec;
     @FXML //  fx:id="LabelSocre"
     private Label LabelSocre;
-    @FXML //  fx:id="ProcessBar"
-    private ProgressBar ProcessBar;
+    @FXML //  fx:id="PauseButton"
+    private ToggleButton PauseButton;
     @FXML //  fx:id="Share"
     private Button Share;
     @FXML //  fx:id="StartGame"
@@ -68,6 +70,8 @@ public class BoardController
     private TitledPane Titled3;
     @FXML //  fx:id="BoardContent"
     private HBox BoardContent;
+    @FXML
+    private TextField Player;
     private ArrayList<String> imgs = new ArrayList<>(48);
     private Difficult gameLevel = Difficult.EASY;
     private int gameSize = 4;
@@ -106,8 +110,21 @@ public class BoardController
     public Difficult getGameLevel() {
         return gameLevel;
     }
-    
-    
+
+    public Number getTotalPoint() {
+        if (this.clockTimeline.getStatus() == Animation.Status.STOPPED) {
+            int bonus = 1;
+            if (this.getGameLevel() == Difficult.HARD) {
+                bonus = 3;
+            } else if (this.getGameLevel() == Difficult.NORMAL) {
+                bonus = 2;
+            }
+            return this.getTimeLeft() * bonus + this.getComboPoint()
+                    + (this.getGameSize() * this.getGameSize() - this.getImgLeft());
+        }
+        return 0;
+    }
+
     @Override // This method is called by the FXMLLoader when initialization is complete
     public void initialize(URL fxmlFileLocation, ResourceBundle resources) {
         imgs.add("/resources/00.png");
@@ -221,12 +238,12 @@ public class BoardController
     }
 
     public void handleStartClick(ActionEvent event) {
-        if(this.clockTimeline != null) {
+        if (this.clockTimeline != null) {
             this.clockTimeline.stop();
         }
         this.BoardContent.getChildren().removeAll(this.BoardContent.getChildren());
         int size = this.gameSize;
-        if (this.imgs.size() < (((size*size)/2) + 1)) {
+        if (this.imgs.size() < (((size * size) / 2) + 1)) {
             Stage dialogStage = new Stage();
             dialogStage.setScene(new Scene(VBoxBuilder.create().
                     children(new Text("This directory does not have enough pictures."
@@ -239,16 +256,16 @@ public class BoardController
             width = this.BoardContent.getWidth() / size;
         }
         this.bsh.setSize(size);
-        this.imgLeft = size*size;
-        
-        if(this.gameLevel == Difficult.EASY) {
-            this.timeLeft = size*size*6;
+        this.imgLeft = size * size;
+
+        if (this.gameLevel == Difficult.EASY) {
+            this.timeLeft = size * size * 6;
         } else if (this.gameLevel == Difficult.NORMAL) {
-            this.timeLeft = size*size*4;
+            this.timeLeft = size * size * 4;
         } else {
-            this.timeLeft = size*size*2;
+            this.timeLeft = size * size * 2;
         }
-        
+
         Random rand = new Random(System.currentTimeMillis());
         ArrayList<String> tmp = new ArrayList<>(this.imgs);
         String back = tmp.remove(rand.nextInt(tmp.size()));
@@ -271,28 +288,90 @@ public class BoardController
         this.clockTimeline.play();
         FinishHandler fh = new FinishHandler(this);
         this.clockTimeline.statusProperty().addListener(fh);
+        this.Accordion.setExpandedPane(Titled3);
+    }
+
+    public void handlePauseClick(ActionEvent event) {
+        if (this.clockTimeline == null) {
+            return;
+        }
+        if (this.clockTimeline.getStatus() == Animation.Status.STOPPED) {
+            return;
+        }
+
+        if (this.PauseButton.isSelected()) {
+            this.clockTimeline.pause();
+            this.BoardContent.setVisible(false);
+            this.PauseButton.setText("Start");
+        } else {
+            this.clockTimeline.play();
+            this.BoardContent.setVisible(true);
+            this.PauseButton.setText("Pause");
+        }
+    }
+
+    public void handleShareClick(ActionEvent event) {
+        try {
+            /**
+             * Create the URL object.
+             */
+            String query = String.format("player=%s&point=%d", this.Player.getText(), this.getTotalPoint());
+            URL url = new URL("http://your-funny-stuff.appspot.com/games/puzzlefx/rank/add?" + query);
+
+            //Create the connection object from the url object.
+            URLConnection connection = url.openConnection();
+
+            //Since this is an Http URL, we can cast the URLConnection to something more specific.
+            HttpURLConnection httpConnection = (HttpURLConnection) connection;
+
+            //Tell it we are reading and writing.
+            httpConnection.setDoInput(true);
+            httpConnection.setDoOutput(true);
+
+            //Recieve whatever data here.
+            InputStream inputStream = httpConnection.getInputStream();
+            java.util.Scanner s = new java.util.Scanner(inputStream).useDelimiter("\\A");
+            Stage dialogStage = new Stage();
+            dialogStage.setScene(new Scene(VBoxBuilder.create().
+                    children(new Text(s.next())).build()));
+            dialogStage.show();
+        } catch (IOException ex) {
+            Stage dialogStage = new Stage();
+            dialogStage.setScene(new Scene(VBoxBuilder.create().
+                    children(new Text(ex.toString())).build()));
+            dialogStage.show();
+        }
     }
 
     @Override
     public void handle(MouseEvent t) {
-        synchronized(this) {
+        synchronized (this) {
+            if (this.clockTimeline.getStatus() == Animation.Status.STOPPED) {
+                return;
+            }
             Graft gr = (Graft) t.getSource();
-            if(!gr.isShowing()) {
-                if(this.showingNow.size() == 2) {
-                    while(this.showingNow.size() > 0) {
+            if (!gr.isShowing()) {
+                if (this.showingNow.size() == 2) {
+                    while (this.showingNow.size() > 0) {
                         Graft grOpen = this.showingNow.remove(0);
                         grOpen.setShowing(false);
                     }
                 }
                 this.showingNow.add(gr);
                 gr.setShowing(true);
-                if(this.showingNow.size() == 2) {
-                    if(this.showingNow.get(0).imgHash() == this.showingNow.get(1).imgHash()) {
+                if (this.showingNow.size() == 2) {
+                    if (this.showingNow.get(0).imgHash() == this.showingNow.get(1).imgHash()) {
+//                        this.showingNow.get(0).setVisible(false);
+//                        this.showingNow.get(1).setVisible(false);
                         this.showingNow.removeAll(this.showingNow);
                         this.imgLeft = this.imgLeft - 2;
+                        this.comboCount++;
+                        this.comboPoint += this.comboCount * 2;
+                    } else {
+                        this.comboCount = 0;
                     }
                 }
-                if(this.imgLeft == 0) {
+                if (this.imgLeft == 0) {
                     //TODO alret win.
                     this.clockTimeline.stop();
                 }

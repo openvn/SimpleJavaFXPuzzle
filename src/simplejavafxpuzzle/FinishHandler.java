@@ -4,33 +4,34 @@
  */
 package simplejavafxpuzzle;
 
+import java.beans.XMLEncoder;
+import java.io.*;
+import java.net.*;
+import java.nio.charset.Charset;
 import javafx.animation.Animation;
 import javafx.animation.Animation.Status;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.Scene;
+import javafx.scene.layout.VBoxBuilder;
+import javafx.scene.text.Text;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 /**
  *
  * @author nvcnvn
  */
 public class FinishHandler implements ChangeListener<Animation.Status> {
+
     private BoardController board;
+
     public FinishHandler(BoardController bc) {
         this.board = bc;
     }
+
     @Override
     public void changed(ObservableValue<? extends Status> ov, Status t, Status t1) {
-        if(t1 == Status.STOPPED) {
-            int bonus = 1;
-            if(this.board.getGameLevel() == Difficult.HARD) {
-                bonus = 3;
-            } else if (this.board.getGameLevel() == Difficult.NORMAL) {
-                bonus = 2;
-            }
-            Number point = this.board.getTimeLeft()*bonus + this.board.getComboPoint()
-                    + (this.board.getGameSize()*this.board.getGameSize() - this.board.getImgLeft());
-            this.board.getLabelSocre().setText(point.toString());
-        }
+            this.board.getLabelSocre().setText(this.board.getTotalPoint().toString());
     }
-    
 }
